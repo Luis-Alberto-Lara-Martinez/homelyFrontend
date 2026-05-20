@@ -318,7 +318,7 @@ export class PropertiesComponent implements OnInit {
       }
 
       // 4c. Filtrar por Superficie (Filtro Adicional)
-      const size = Number(prop.residence?.size || prop.size || prop.superficie || prop.m2) || 0;
+      const size = Number(prop.surface || prop.residence?.size || prop.size || prop.superficie || prop.m2) || 0;
       if (this.filterMinSize !== null && size < this.filterMinSize) {
         return false;
       }

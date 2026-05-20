@@ -1,10 +1,8 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Properties } from '../../services/properties/properties';
-
-const GENERIC_AGENT_IMAGE = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%232563eb"/><stop offset="100%" stop-color="%231d4ed8"/></linearGradient></defs><rect width="128" height="128" rx="32" fill="url(%23g)"/><path d="M64 28 L32 56 V96 H96 V56 Z" fill="white" opacity="0.15"/><path d="M64 22 L24 54 L32 60 L64 34 L96 60 L104 54 Z" fill="white"/><rect x="52" y="66" width="24" height="30" rx="6" fill="white"/><circle cx="64" cy="46" r="6" fill="white" opacity="0.8"/></svg>';
 
 interface Property {
   id: number;
@@ -19,12 +17,19 @@ interface Property {
   features: string[];
   type: string;
   status: string;
-  agent: {
-    name: string;
-    phone: string;
-    email: string;
-    image: string;
-  };
+  residence?: {
+    bedrooms?: number;
+    bathrooms?: number;
+    conservation?: string;
+    orientation?: string;
+  } | null;
+  energyCertificate?: {
+    hasCertificate?: boolean;
+    consumptionScale?: string;
+    consumptionValue?: number;
+    emissionsScale?: string;
+    emissionsValue?: number;
+  } | null;
 }
 
 @Component({
@@ -58,6 +63,7 @@ export class PropertyDetailsComponent implements OnInit {
   activeImageIndex: number = 0;
   isLightboxOpen: boolean = false;
   isAnimating: boolean = false;
+  isLoading: boolean = true;
 
   // Formulario de contacto
   contactData = {
@@ -69,8 +75,16 @@ export class PropertyDetailsComponent implements OnInit {
 
   submitContactForm(form: NgForm) {
     if (form.valid) {
-      console.log('Contacto enviado (simulado):', this.contactData);
-      this.isSubmitted = true;
+      this.propertiesService.sendContactRequest(this.contactData).subscribe({
+        next: (response) => {
+          console.log('Contacto enviado con éxito:', response);
+          this.isSubmitted = true;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error al enviar el contacto:', err);
+        }
+      });
     } else {
       // Marcar todos los campos como tocados para mostrar errores
       Object.keys(form.controls).forEach(key => {
@@ -101,6 +115,8 @@ export class PropertyDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
     private propertiesService: Properties
   ) { }
 
@@ -247,45 +263,48 @@ export class PropertyDetailsComponent implements OnInit {
           return;
         }
 
-        // Opción 3: Llamar de respaldo a getAllProperties() para recargas directas o URLs compartidas
-        console.log('Homely Detail Page - Buscando en la lista completa del backend de respaldo...');
-        this.propertiesService.getAllProperties().subscribe({
-          next: (properties: any) => {
+        console.log('Homely Detail Page - Buscando propiedad individual en el backend...');
+        this.isLoading = true;
+        this.propertiesService.getPropertyById(Number(id)).subscribe({
+          next: (property: any) => {
+            this.isLoading = false;
             try {
-              let list: any[] = [];
-              if (Array.isArray(properties)) {
-                list = properties;
-              } else if (properties && Array.isArray(properties.data)) {
-                list = properties.data;
-              } else if (properties && Array.isArray(properties.properties)) {
-                list = properties.properties;
-              } else if (properties && Array.isArray(properties.content)) {
-                list = properties.content;
-              }
-
-              const found = list.find((p: any) => p && Number(p.id) === Number(id));
-              if (found) {
-                console.log('Homely Detail Page - Encontrado en la lista del backend cargada en segundo plano!');
-                this.mapPropertyData(found);
+              if (property && property.id) {
+                console.log('Homely Detail Page - Encontrado en el backend!');
+                this.mapPropertyData(property);
               } else {
-                console.warn(`Homely Detail Page - ID ${id} no encontrado en el listado. Cargando fallback simulado.`);
-                this.loadFallbackMock(Number(id));
+                console.warn(`Homely Detail Page - ID ${id} no encontrado. Redirigiendo...`);
+                this.router.navigate(['/propiedades']);
               }
             } catch (err) {
               console.error('Homely Detail Page - Excepción parseando respuesta del backend:', err);
-              this.loadFallbackMock(Number(id));
+              this.router.navigate(['/propiedades']);
             }
           },
           error: (err: any) => {
-            console.warn('Homely Detail Page - Error al obtener listado completo, cargando fallback simulado:', err);
-            this.loadFallbackMock(Number(id));
+            this.isLoading = false;
+            this.cdr.detectChanges();
+            if (err.status === 404) {
+              console.warn('Homely Detail Page - Error 404 al obtener propiedad, redirigiendo a /propiedades');
+              this.router.navigate(['/propiedades']);
+            } else {
+              console.error('Homely Detail Page - Error desconocido al obtener propiedad:', err);
+              this.router.navigate(['/propiedades']);
+            }
           }
         });
       }
     });
   }
 
+  showRoomsAndBaths(): boolean {
+    if (!this.property) return false;
+    const type = (this.property.type || '').toLowerCase();
+    return type !== 'garaje' && type !== 'trastero';
+  }
+
   private mapPropertyData(data: any): void {
+    this.isLoading = false;
     try {
       // Formateador de imágenes
       const formatImageUrl = (url: string): string => {
@@ -374,16 +393,6 @@ export class PropertyDetailsComponent implements OnInit {
         uiFeatures.push('Calefacción', 'Suelo Radiante', 'Aire Concondicionado');
       }
 
-      // Mapear datos del usuario/agente
-      let agentName = 'Elena Rodríguez';
-      if (typeof data.user === 'string' && data.user) {
-        agentName = data.user;
-      } else if (data.user && typeof data.user === 'object') {
-        agentName = data.user.name || (data.user.firstName ? `${data.user.firstName} ${data.user.lastName || ''}`.trim() : '') || agentName;
-      } else if (data.agent) {
-        agentName = data.agent.name || agentName;
-      }
-
       this.property = {
         id: Number(data.id),
         title: data.title || 'Propiedad sin título',
@@ -397,14 +406,22 @@ export class PropertyDetailsComponent implements OnInit {
         features: uiFeatures,
         type: (data.type || data.residence?.type || data.tipoVivienda || 'VIVIENDA').toUpperCase(),
         status: (data.transaction || data.operacion || data.status || 'EN VENTA').toUpperCase() === 'ALQUILER' ? 'ALQUILER' : 'EN VENTA',
-        agent: {
-          name: agentName,
-          phone: '+34 600 000 000',
-          email: 'info@homely.com',
-          image: GENERIC_AGENT_IMAGE
-        }
+        residence: data.residence ? {
+          bedrooms: data.residence.bedrooms,
+          bathrooms: data.residence.bathrooms,
+          conservation: data.residence.conservation,
+          orientation: data.residence.orientation
+        } : null,
+        energyCertificate: data.energyCertificate ? {
+          hasCertificate: data.energyCertificate.hasCertificate,
+          consumptionScale: data.energyCertificate.consumptionScale,
+          consumptionValue: data.energyCertificate.consumptionValue,
+          emissionsScale: data.energyCertificate.emissionsScale,
+          emissionsValue: data.energyCertificate.emissionsValue
+        } : null
       };
       this.activeImageIndex = 0;
+      this.cdr.detectChanges();
     } catch (err) {
       console.error('Homely Detail Page - Error mapeando datos del objeto de búsqueda:', err);
       this.loadFallbackMock(Number(data?.id || 0));
@@ -436,11 +453,18 @@ export class PropertyDetailsComponent implements OnInit {
       ],
       type: 'VILLA',
       status: 'EN VENTA',
-      agent: {
-        name: 'Elena Rodríguez',
-        phone: '+34 600 000 000',
-        email: 'elena@homely.com',
-        image: GENERIC_AGENT_IMAGE
+      residence: {
+        bedrooms: 5,
+        bathrooms: 4,
+        conservation: 'Excelente',
+        orientation: 'SO'
+      },
+      energyCertificate: {
+        hasCertificate: true,
+        consumptionScale: 'A',
+        consumptionValue: 45,
+        emissionsScale: 'A',
+        emissionsValue: 12
       }
     };
     this.activeImageIndex = 0;

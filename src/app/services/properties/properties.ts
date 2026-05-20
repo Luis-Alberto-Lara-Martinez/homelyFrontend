@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
 })
 export class Properties {
   private baseUrl = environment.backendUrl + '/api/properties'; // Base URL del backend
-  
+
   // Cache para almacenar las propiedades devueltas de la búsqueda en el frontend
   public latestResults: any[] = [];
 
@@ -48,7 +48,7 @@ export class Properties {
   getPropertyById(id: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<any>(`${this.baseUrl}/${id}`, { headers });
+    return this.http.post<any>(`${environment.backendUrl}/api/property/${id}`, {}, { headers });
   }
 
   // Crear una nueva propiedad (asume POST /api/properties)
@@ -82,5 +82,11 @@ export class Properties {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.get<any[]>(`${this.baseUrl}/transactions`, { headers });
+  }
+
+  sendContactRequest(requestData: {email: string, name: string, message: string}): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any>(`${environment.backendUrl}/api/contact`, requestData, { headers });
   }
 }
