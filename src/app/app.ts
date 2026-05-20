@@ -3,14 +3,14 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule, Location } from '@angular/common';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
-import { AccessibilityWidgetComponent } from './components/accessibility-widget/accessibility-widget.component';
+import { AccessibilityService } from './services/accessibility.service';
 import { filter } from 'rxjs/operators';
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent, AccessibilityWidgetComponent],
+  imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -19,6 +19,7 @@ export class App implements OnInit {
   showHeaderFooter = false; // Empezamos en false para evitar el parpadeo inicial
   private router = inject(Router);
   private location = inject(Location);
+  private accessibilityService = inject(AccessibilityService);
 
   ngOnInit() {
     const hiddenRoutes = ['/login', '/registro', '/forgot-password', '/reset-password'];

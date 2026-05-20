@@ -1,8 +1,9 @@
-import { Component, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, NgZone, ChangeDetectorRef, Renderer2, Inject } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { Users } from '../../services/users/users';
 import { finalize } from 'rxjs';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { AccessibilityService } from '../../services/accessibility.service';
 
 
 @Component({
@@ -15,6 +16,14 @@ export class ProfileComponent implements OnInit {
   user: any = null;
   isLoading: boolean = true;
   errorMessage: string = '';
+
+  // Control de pestañas
+  activeTab: 'profile' | 'accessibility' = 'profile';
+
+  // Configuración de Accesibilidad
+  get activeColorBlindness() { return this.accessibilityService.activeColorBlindness; }
+  get isLargeText() { return this.accessibilityService.isLargeText; }
+  get isHighContrast() { return this.accessibilityService.isHighContrast; }
 
   // Cambio de contraseña
   passwordForm: FormGroup;
@@ -41,7 +50,10 @@ export class ProfileComponent implements OnInit {
     private fb: FormBuilder,
     private usersService: Users,
     private zone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private renderer: Renderer2,
+    @Inject(DOCUMENT) private document: Document,
+    public accessibilityService: AccessibilityService
   ) {
     this.passwordForm = this.fb.group({
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
@@ -239,9 +251,32 @@ export class ProfileComponent implements OnInit {
             }
 
             this.showNotification(errorMsg, 'error');
-            this.avatarPreview = null;
           });
         }
       });
+  }
+
+  setTab(tab: 'profile' | 'accessibility') {
+    this.activeTab = tab;
+  }
+
+  setColorBlindness(filterClass: string) {
+    if (this.activeColorBlindness === filterClass) {
+      this.accessibilityService.setColorBlindness(null);
+    } else {
+      this.accessibilityService.setColorBlindness(filterClass);
+    }
+  }
+
+  toggleTextSize() {
+    this.accessibilityService.toggleTextSize();
+  }
+
+  toggleHighContrast() {
+    this.accessibilityService.toggleHighContrast();
+  }
+
+  resetAccessibility() {
+    this.accessibilityService.resetAccessibility();
   }
 }
