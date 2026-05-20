@@ -15,7 +15,6 @@ import { filter } from 'rxjs/operators';
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-  isChatOpen = false;
   showHeaderFooter = false; // Empezamos en false para evitar el parpadeo inicial
   private router = inject(Router);
   private location = inject(Location);
@@ -23,10 +22,10 @@ export class App implements OnInit {
 
   ngOnInit() {
     const hiddenRoutes = ['/login', '/registro', '/forgot-password', '/reset-password'];
-    
+
     // 1. Comprobación síncrona INMEDIATA para la primera carga de la página
     const initialPath = this.location.path().split('?')[0] || window.location.pathname;
-    this.showHeaderFooter = !hiddenRoutes.includes(initialPath) && initialPath !== '/'; 
+    this.showHeaderFooter = !hiddenRoutes.includes(initialPath) && initialPath !== '/';
     // Nota: initialPath === '/' normalmente redirige a '/login', por eso también lo ocultamos.
 
     // 2. Comprobación asíncrona para cuando el usuario navega por la app
@@ -36,9 +35,5 @@ export class App implements OnInit {
       const currentUrl = event.urlAfterRedirects.split('?')[0];
       this.showHeaderFooter = !hiddenRoutes.includes(currentUrl);
     });
-  }
-
-  toggleChat() {
-    this.isChatOpen = !this.isChatOpen;
   }
 }
