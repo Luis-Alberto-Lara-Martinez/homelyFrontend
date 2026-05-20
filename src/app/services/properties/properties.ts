@@ -75,7 +75,7 @@ export class Properties {
   deleteProperty(id: number): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.delete<any>(`${this.baseUrl}/${id}`, { headers });
+    return this.http.delete<any>(`${environment.backendUrl}/admin/property/${id}`, { headers });
   }
 
   getAllPropertyTypes(): Observable<any[]> {
