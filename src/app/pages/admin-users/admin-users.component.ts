@@ -116,38 +116,33 @@ export class AdminUsersComponent implements OnInit {
 
   onSearch() {
     const query = this.searchQuery.trim();
-    
+
     if (query === '') {
       this.loadUsers(1);
       return;
     }
 
-    // Comprobar si parece un correo electrónico válido
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(query)) {
-      this.loading = true;
-      this.cdr.detectChanges();
-      
-      this.usersService.getUser(query).subscribe({
-        next: (user: any) => {
-          this.filteredUsers = user ? [user] : [];
-          this.loading = false;
-          this.currentPage = 1;
-          this.totalPages = 1;
-          this.totalElements = 1;
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.warn('Usuario no encontrado por email en el servidor:', err);
-          this.filteredUsers = [];
-          this.loading = false;
-          this.showToast('Usuario no encontrado.', 'error');
-          this.cdr.detectChanges();
-        }
-      });
-    } else {
-      this.showToast('Introduce un correo electrónico válido.', 'error');
-    }
+    this.loading = true;
+
+    this.usersService.getUser(query).subscribe({
+      next: (user: any) => {
+        this.filteredUsers = user ? [user] : [];
+        this.loading = false;
+        this.currentPage = 1;
+        this.totalPages = 1;
+        this.totalElements = 1;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.warn('Usuario no encontrado por email en el servidor:', err);
+        this.filteredUsers = [];
+        this.loading = false;
+        this.showToast('Usuario no encontrado.', 'error');
+        this.cdr.detectChanges();
+      }
+    });
+
+    this.cdr.detectChanges();
   }
 
   openDeleteModal(user: any) {
