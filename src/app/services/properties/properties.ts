@@ -84,9 +84,15 @@ export class Properties {
     return this.http.get<any[]>(`${this.baseUrl}/transactions`, { headers });
   }
 
-  sendContactRequest(requestData: {email: string, name: string, message: string}): Observable<any> {
+  sendContactRequest(requestData: { email: string, name: string, message: string }): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.post<any>(`${environment.backendUrl}/api/contact`, requestData, { headers });
+  }
+
+  sendWorkWithUs(formData: FormData): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any>(`${environment.backendUrl}/api/work-with-us`, formData, { headers });
   }
 }

@@ -104,30 +104,31 @@
                 </div>
               </div>
               <div class="relative">
-                <label class="form-label">Email de contacto *</label>
+                <label class="form-label">Teléfono móvil *</label>
                 <div class="relative">
                   <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </span>
-                  <input type="email" [(ngModel)]="formData.email" name="email" class="form-input !pl-12"
-                    placeholder="juan@ejemplo.com" required email>
+                  <input type="tel" [(ngModel)]="formData.phone" name="phone" class="form-input !pl-12"
+                    placeholder="+34 600 000 000" required>
                 </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <label class="form-label">Teléfono móvil</label>
-                <input type="tel" [(ngModel)]="formData.phone" name="phone" class="form-input"
-                  placeholder="+34 600 000 000">
-              </div>
-              <div>
-                <label class="form-label">LinkedIn / Portfolio URL</label>
-                <input type="url" [(ngModel)]="formData.portfolio" name="portfolio" class="form-input"
-                  placeholder="linkedin.com/in/perfil">
+            <div class="relative">
+              <label class="form-label">Email de contacto *</label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </span>
+                <input type="email" [(ngModel)]="formData.email" name="email" class="form-input !pl-12"
+                  placeholder="juan@ejemplo.com" required email>
               </div>
             </div>
 
@@ -137,9 +138,10 @@
                 placeholder="Cuéntanos brevemente tus mayores logros profesionales..." required></textarea>
             </div>
 
-            <!-- Upload CV Placeholder -->
-            <div
+            <!-- Upload CV -->
+            <div (click)="fileInput.click()"
               class="border-2 border-dashed border-gray-100 rounded-[2rem] p-8 text-center hover:border-brand-blue/30 hover:bg-brand-blue/5 transition-all cursor-pointer group">
+              <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" class="hidden">
               <div
                 class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white transition-colors">
                 <svg class="w-6 h-6 text-gray-400 group-hover:text-brand-blue" fill="none" stroke="currentColor"
@@ -147,11 +149,25 @@
                   <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <p class="text-sm font-bold text-brand-dark mb-1">Adjuntar CV en PDF</p>
-              <p class="text-xs text-gray-400">Arrastra tu archivo o haz clic para subir</p>
+              <p class="text-sm font-bold text-brand-dark mb-1">
+                {{ selectedFile ? selectedFile.name : 'Adjuntar CV en PDF *' }}
+              </p>
+              <p class="text-xs text-gray-400">
+                {{ selectedFile ? 'Haga clic para cambiar de archivo' : 'Arrastra tu archivo o haz clic para subir' }}
+              </p>
             </div>
 
-            <button type="submit" [disabled]="!recruitmentForm.form.valid"
+            <!-- Mensaje de Error de Envío -->
+            <div *ngIf="submissionError"
+              class="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-semibold border border-red-100 flex items-center gap-3 animate-in fade-in duration-200">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>{{ submissionError }}</span>
+            </div>
+
+            <button type="submit" [disabled]="!recruitmentForm.form.valid || !selectedFile"
               class="w-full bg-gradient-brand text-white py-5 rounded-[2rem] font-black text-lg transition-all transform enabled:hover:-translate-y-1 enabled:hover:shadow-[0_20px_40px_rgba(75,123,245,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3">
               Enviar Solicitud
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

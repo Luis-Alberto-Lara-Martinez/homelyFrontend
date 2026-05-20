@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Properties } from '../../services/properties/properties';
 
 @Component({
   selector: 'app-trabaja-con-nosotros',
@@ -15,12 +16,12 @@ export class TrabajaConNosotrosComponent {
     email: '',
     phone: '',
     position: 'Agente Inmobiliario',
-    experience: '',
-    portfolio: '',
     message: ''
   };
 
   submitted = false;
+  submissionError: string | null = null;
+  selectedFile: File | null = null;
 
   positions = [
     'Agente Inmobiliario',
@@ -31,13 +32,43 @@ export class TrabajaConNosotrosComponent {
     'Administración'
   ];
 
-  onSubmit() {
-    console.log('Solicitud enviada:', this.formData);
-    this.submitted = true;
+  constructor(
+    private propertiesService: Properties,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-    // Simulate API call
-    setTimeout(() => {
-      // In a real app, we would send this to the backend
-    }, 1500);
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      this.cdr.detectChanges();
+    }
+  }
+
+  onSubmit() {
+    if (!this.selectedFile) return;
+    this.submissionError = null;
+    this.cdr.detectChanges();
+
+    const formData = new FormData();
+    formData.append('from', this.formData.email);
+    formData.append('name', this.formData.name);
+    formData.append('workingArea', this.formData.position);
+    formData.append('phone', this.formData.phone);
+    formData.append('description', this.formData.message);
+    formData.append('cvFile', this.selectedFile);
+
+    this.propertiesService.sendWorkWithUs(formData).subscribe({
+      next: (response) => {
+        console.log('Solicitud enviada con éxito:', response);
+        this.submitted = true;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al enviar la solicitud de empleo:', err);
+        this.submissionError = 'Ocurrió un error al enviar tu solicitud. Por favor, inténtalo de nuevo.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
