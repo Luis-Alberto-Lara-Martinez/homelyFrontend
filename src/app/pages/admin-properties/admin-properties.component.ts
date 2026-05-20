@@ -23,9 +23,9 @@ export class AdminPropertiesComponent implements OnInit {
   propertyToDelete: any = null;
   isDeleting: boolean = false;
 
-  // Pagination (Frontend)
+  // Pagination (Backend)
   currentPage: number = 1;
-  pageSize: number = 5;
+  pageSize: number = 3;
   totalPages: number = 0;
   totalElements: number = 0;
 
@@ -42,23 +42,28 @@ export class AdminPropertiesComponent implements OnInit {
     this.loadProperties();
   }
 
-  loadProperties() {
+  loadProperties(page: number = 1) {
     this.loading = true;
-    this.propertiesService.getAllProperties().subscribe({
+    this.cdr.detectChanges();
+    this.propertiesService.getPagedProperties(page - 1, this.pageSize).subscribe({
       next: (data: any) => {
+        // En base a la estructura Page de Spring Boot o array directo
         let items: any[] = [];
-        if (Array.isArray(data)) {
-          items = data;
-        } else if (data && Array.isArray(data.content)) {
+        if (data && Array.isArray(data.content)) {
           items = data.content;
-        } else if (data && Array.isArray(data.data)) {
-          items = data.data;
+          this.totalPages = data.totalPages || 0;
+          this.totalElements = data.totalElements || 0;
+        } else if (Array.isArray(data)) {
+          items = data;
+          this.totalPages = Math.ceil(items.length / this.pageSize);
+          this.totalElements = items.length;
         }
 
         this.properties = items;
-        this.totalElements = items.length;
-        this.updatePagination();
+        this.filteredProperties = items;
+        this.currentPage = page;
         this.loading = false;
+        console.log('Propiedades cargadas:', this.properties);
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -70,68 +75,111 @@ export class AdminPropertiesComponent implements OnInit {
     });
   }
 
-  updatePagination() {
-    let filtered = this.properties;
+  onSearch() {
+    const query = this.searchQuery.trim();
 
-    if (this.searchQuery.trim()) {
-      const q = this.searchQuery.toLowerCase();
-      filtered = this.properties.filter(p =>
-        (p.title && p.title.toLowerCase().includes(q)) ||
-        (p.location && p.location.toLowerCase().includes(q)) ||
-        (p.address && typeof p.address === 'string' && p.address.toLowerCase().includes(q))
-      );
+    if (query === '') {
+      this.loadProperties(1);
+      return;
     }
 
-    this.totalElements = filtered.length;
-    this.totalPages = Math.ceil(this.totalElements / this.pageSize);
+    this.loading = true;
+    this.cdr.detectChanges();
 
-    if (this.currentPage > this.totalPages) {
-      this.currentPage = this.totalPages > 0 ? this.totalPages : 1;
+    // Si es un número (ID de la propiedad), podemos intentar buscar por ID
+    if (/^\d+$/.test(query)) {
+      this.propertiesService.getPropertyById(Number(query)).subscribe({
+        next: (property: any) => {
+          this.filteredProperties = property ? [property] : [];
+          this.currentPage = 1;
+          this.totalPages = property ? 1 : 0;
+          this.totalElements = property ? 1 : 0;
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.warn('Propiedad no encontrada por ID, intentando búsqueda local:', err);
+          this.searchLocally(query);
+        }
+      });
+    } else {
+      this.searchLocally(query);
     }
-
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    this.filteredProperties = filtered.slice(startIndex, startIndex + this.pageSize);
   }
 
-  onSearch() {
-    this.currentPage = 1;
-    this.updatePagination();
+  searchLocally(query: string) {
+    const q = query.toLowerCase();
+    this.propertiesService.getAllProperties().subscribe({
+      next: (data: any) => {
+        let items: any[] = [];
+        if (data && Array.isArray(data.content)) {
+          items = data.content;
+        } else if (Array.isArray(data)) {
+          items = data;
+        }
+
+        const filtered = items.filter(p =>
+          (p.title && p.title.toLowerCase().includes(q)) ||
+          (p.location && p.location.toLowerCase().includes(q)) ||
+          (p.address && typeof p.address === 'string' && p.address.toLowerCase().includes(q)) ||
+          (p.address && typeof p.address === 'object' && (
+            (p.address.street && p.address.street.toLowerCase().includes(q)) ||
+            (p.address.city && p.address.city.toLowerCase().includes(q))
+          ))
+        );
+
+        this.filteredProperties = filtered;
+        this.currentPage = 1;
+        this.totalPages = 1;
+        this.totalElements = filtered.length;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al realizar búsqueda local:', err);
+        this.filteredProperties = [];
+        this.loading = false;
+        this.showToast('Error al realizar la búsqueda.', 'error');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   nextPage() {
     if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePagination();
+      this.loadProperties(this.currentPage + 1);
     }
   }
 
   prevPage() {
     if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePagination();
+      this.loadProperties(this.currentPage - 1);
     }
   }
 
   openDeleteModal(property: any) {
     this.propertyToDelete = property;
     this.showDeleteModal = true;
+    this.cdr.detectChanges();
   }
 
   closeDeleteModal() {
     this.showDeleteModal = false;
     this.propertyToDelete = null;
+    this.cdr.detectChanges();
   }
 
   confirmDelete() {
     if (!this.propertyToDelete) return;
 
     this.isDeleting = true;
+    this.cdr.detectChanges();
     this.propertiesService.deleteProperty(this.propertyToDelete.id).subscribe({
       next: () => {
         this.isDeleting = false;
         this.showToast('Propiedad eliminada correctamente.', 'success');
         this.closeDeleteModal();
-        this.loadProperties();
+        this.loadProperties(this.currentPage);
       },
       error: (err) => {
         console.error('Error deleting property', err);

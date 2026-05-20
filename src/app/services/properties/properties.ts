@@ -27,6 +27,12 @@ export class Properties {
     );
   }
 
+  getPagedProperties(page: number, size: number): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any[]>(`${environment.backendUrl}/admin/properties`, { page, size }, { headers });
+  }
+
   // Obtener propiedades dentro de un radio (POST /api/properties)
   getPropertiesWithinRadius(latitude: number, longitude: number, radiusKm: number): Observable<any[]> {
     const token = localStorage.getItem('token');

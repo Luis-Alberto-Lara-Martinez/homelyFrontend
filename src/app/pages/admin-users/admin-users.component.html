@@ -29,7 +29,7 @@
     <!-- Tabla de Usuarios -->
     <div
       class="bg-white rounded-[2.5rem] shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] border border-gray-100 overflow-hidden">
-      <div class="overflow-x-auto">
+      <div *ngIf="!loading" class="overflow-x-auto">
         <table class="w-full text-left">
           <thead>
             <tr class="bg-gray-50/50 border-b border-gray-50">
@@ -205,7 +205,7 @@
       </div>
 
       <!-- Paginación -->
-      <div class="px-8 py-6 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between">
+      <div *ngIf="!loading" class="px-8 py-6 bg-gray-50/50 border-t border-gray-50 flex items-center justify-between">
         <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
           Página <span class="text-brand-blue">{{currentPage}}</span> de {{totalPages}}
           <span class="mx-2 text-gray-200">|</span>
