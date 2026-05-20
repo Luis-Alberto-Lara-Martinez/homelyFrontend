@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Properties } from '../../services/properties/properties';
+import { Users } from '../../services/users/users';
 
 interface Property {
   id: number;
@@ -117,7 +118,8 @@ export class PropertyDetailsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private propertiesService: Properties
+    private propertiesService: Properties,
+    public usersService: Users
   ) { }
 
   openLightbox() {
@@ -421,6 +423,7 @@ export class PropertyDetailsComponent implements OnInit {
         } : null
       };
       this.activeImageIndex = 0;
+      this.checkIfFavorite();
       this.cdr.detectChanges();
     } catch (err) {
       console.error('Homely Detail Page - Error mapeando datos del objeto de búsqueda:', err);
@@ -468,6 +471,93 @@ export class PropertyDetailsComponent implements OnInit {
       }
     };
     this.activeImageIndex = 0;
+    this.checkIfFavorite();
+  }
+
+  isFavorite: boolean = false;
+  favoriteRelationId: number | null = null;
+
+  showToast: boolean = false;
+  toastMessage: string = '';
+  toastType: 'success' | 'error' | 'loading' = 'success';
+  toastTimeout: any;
+
+  showToastMessage(message: string, type: 'success' | 'error' | 'loading' = 'success') {
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    if (type !== 'loading') {
+      this.toastTimeout = setTimeout(() => {
+        this.showToast = false;
+        this.cdr.detectChanges();
+      }, 3000);
+    }
+    this.cdr.detectChanges();
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  checkIfFavorite(): void {
+    if (!this.property || !this.isLoggedIn()) {
+      this.isFavorite = false;
+      this.favoriteRelationId = null;
+      return;
+    }
+
+    this.usersService.getFavouritesProperties().subscribe({
+      next: (favouritesList: any[]) => {
+        const found = (favouritesList || []).find(fav => fav.property && Number(fav.property.id) === Number(this.property!.id));
+        if (found) {
+          this.isFavorite = true;
+          this.favoriteRelationId = found.id;
+        } else {
+          this.isFavorite = false;
+          this.favoriteRelationId = null;
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Property Details Component - Error checking favorites:', err);
+      }
+    });
+  }
+
+  toggleFavorite(): void {
+    if (!this.property || !this.isLoggedIn()) return;
+    this.showToastMessage('Actualizando favoritos...', 'loading');
+
+    if (this.isFavorite) {
+      this.usersService.deleteFavouriteProperty(this.property.id).subscribe({
+        next: () => {
+          console.log('Property Details Component - Favorito eliminado:', this.property!.id);
+          this.isFavorite = false;
+          this.favoriteRelationId = null;
+          this.showToastMessage('Propiedad eliminada de favoritos.', 'success');
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Property Details Component - Error al eliminar de favoritos:', err);
+          this.showToastMessage('No se pudo eliminar de favoritos.', 'error');
+        }
+      });
+    } else {
+      this.usersService.postFavouriteProperty(this.property.id).subscribe({
+        next: () => {
+          console.log('Property Details Component - Favorito añadido:', this.property!.id);
+          this.isFavorite = true;
+          this.showToastMessage('Propiedad añadida a favoritos.', 'success');
+          this.checkIfFavorite();
+        },
+        error: (err) => {
+          console.error('Property Details Component - Error al añadir a favoritos:', err);
+          this.showToastMessage('No se pudo añadir a favoritos.', 'error');
+        }
+      });
+    }
   }
 }
 

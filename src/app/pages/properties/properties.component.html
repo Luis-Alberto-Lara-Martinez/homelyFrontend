@@ -281,9 +281,55 @@
 
 
 
-    <app-featured-properties [properties]="propertiesList"></app-featured-properties>
+    <app-featured-properties [properties]="propertiesList" [favoriteIds]="favoriteIds" (toggleFavorite)="toggleFavorite($event)"></app-featured-properties>
   </div>
   <app-cta-banner></app-cta-banner>
+
+  <!-- Notificación Pop-up (Toast) -->
+  <div *ngIf="showToast" 
+       class="fixed top-24 right-8 animate-in slide-in-from-right-full duration-500"
+       style="z-index: 99999 !important;">
+      <div [ngClass]="{
+              'border-green-100 text-green-800 shadow-green-100/50': toastType === 'success',
+              'border-red-100 text-red-800 shadow-red-100/50': toastType === 'error',
+              'border-brand-blue/20 text-brand-blue shadow-brand-blue/10': toastType === 'loading'
+           }"
+           class="flex items-center gap-4 p-5 rounded-2xl border shadow-2xl min-w-[320px]"
+           style="background-color: #ffffff !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;">
+          
+          <!-- Icono Éxito -->
+          <div *ngIf="toastType === 'success'" class="flex-shrink-0 w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+          </div>
+
+          <!-- Icono Error -->
+          <div *ngIf="toastType === 'error'" class="flex-shrink-0 w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+          </div>
+
+          <!-- Icono Carga -->
+          <div *ngIf="toastType === 'loading'" class="flex-shrink-0 w-12 h-12 bg-brand-blue/5 rounded-xl flex items-center justify-center text-brand-blue">
+              <div class="animate-spin rounded-full h-6 w-6 border-2 border-brand-blue border-t-transparent"></div>
+          </div>
+
+          <div class="flex-grow">
+              <p class="text-sm font-black uppercase tracking-wider mb-0.5">
+                  {{ toastType === 'success' ? 'Completado' : (toastType === 'error' ? 'Error' : 'Procesando') }}
+              </p>
+              <p class="text-sm font-medium opacity-80">{{ toastMessage }}</p>
+          </div>
+
+          <button (click)="showToast = false" class="text-gray-400 hover:text-gray-600 p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+          </button>
+      </div>
+  </div>
 </div>
 
 <!-- Modal del Mapa Interactivo -->
@@ -381,5 +427,4 @@
         Haz clic en el mapa para marcar el centro
       </div>
     </div>
-  </div>
-</div>
+  </div>

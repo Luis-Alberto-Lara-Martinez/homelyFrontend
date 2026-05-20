@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Properties } from '../../services/properties/properties';
+import { Users } from '../../services/users/users';
 import { FeaturedPropertiesComponent } from '../../components/featured-properties/featured-properties.component';
 import { CtaBannerComponent } from '../../components/cta-banner/cta-banner.component';
 
@@ -20,6 +21,8 @@ export class PropertiesComponent implements OnInit {
   isSearchFiltered: boolean = false;
   searchRadiusKm: number = 2;
   isLoading: boolean = true;
+  favorites: any[] = [];
+  favoriteIds: number[] = [];
 
   // Variables de ubicación/mapa
   location: string = '';
@@ -86,7 +89,8 @@ export class PropertiesComponent implements OnInit {
     private router: Router,
     private propertiesService: Properties,
     private cdr: ChangeDetectorRef,
-    private zone: NgZone
+    private zone: NgZone,
+    public usersService: Users
   ) { }
 
   @HostListener('document:click')
@@ -197,6 +201,7 @@ export class PropertiesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadFavorites();
     this.loadPropertyTypes();
     this.loadPropertyTransactions();
     this.route.queryParams.subscribe(params => {
@@ -563,5 +568,77 @@ export class PropertiesComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  showToast: boolean = false;
+  toastMessage: string = '';
+  toastType: 'success' | 'error' | 'loading' = 'success';
+  toastTimeout: any;
+
+  showToastMessage(message: string, type: 'success' | 'error' | 'loading' = 'success') {
+    if (this.toastTimeout) clearTimeout(this.toastTimeout);
+    this.toastMessage = message;
+    this.toastType = type;
+    this.showToast = true;
+    
+    if (type !== 'loading') {
+      this.toastTimeout = setTimeout(() => {
+        this.showToast = false;
+        this.cdr.detectChanges();
+      }, 3000);
+    }
+    this.cdr.detectChanges();
+  }
+
+  loadFavorites() {
+    if (!localStorage.getItem('token')) return;
+    this.usersService.getFavouritesProperties().subscribe({
+      next: (favouritesList: any[]) => {
+        this.favorites = favouritesList || [];
+        this.favoriteIds = (favouritesList || [])
+          .map(fav => fav.property?.id)
+          .filter(id => id !== undefined && id !== null);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Properties Component - Error loading favorites:', err);
+      }
+    });
+  }
+
+  toggleFavorite(event: { propertyId: number, isFavorite: boolean }) {
+    const { propertyId, isFavorite } = event;
+    this.showToastMessage('Actualizando favoritos...', 'loading');
+
+    if (isFavorite) {
+      const relation = this.favorites.find(fav => fav.property && Number(fav.property.id) === Number(propertyId));
+      if (relation) {
+        this.usersService.deleteFavouriteProperty(relation.property?.id).subscribe({
+          next: () => {
+            console.log('Properties Component - Favorito eliminado:', propertyId);
+            this.showToastMessage('Propiedad eliminada de favoritos.', 'success');
+            this.loadFavorites();
+          },
+          error: (err) => {
+            console.error('Properties Component - Error al eliminar el favorito:', err);
+            this.showToastMessage('No se pudo eliminar de favoritos.', 'error');
+          }
+        });
+      } else {
+        this.showToastMessage('No se encontró la propiedad en tus favoritos.', 'error');
+      }
+    } else {
+      this.usersService.postFavouriteProperty(propertyId).subscribe({
+        next: () => {
+          console.log('Properties Component - Favorito guardado:', propertyId);
+          this.showToastMessage('Propiedad añadida a favoritos.', 'success');
+          this.loadFavorites();
+        },
+        error: (err) => {
+          console.error('Properties Component - Error al guardar el favorito:', err);
+          this.showToastMessage('No se pudo añadir a favoritos.', 'error');
+        }
+      });
+    }
   }
 }

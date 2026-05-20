@@ -173,4 +173,22 @@ export class Users {
       params: { "email": email }
     });
   }
+
+  getFavouritesProperties(): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any[]>(`${environment.backendUrl}/api/favourites`, { headers });
+  }
+
+  postFavouriteProperty(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any>(`${environment.backendUrl}/api/favourites`, { "propertyId": id }, { headers });
+  }
+
+  deleteFavouriteProperty(id: number): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.delete<any>(`${environment.backendUrl}/api/favourites/${id}`, { headers });
+  }
 }

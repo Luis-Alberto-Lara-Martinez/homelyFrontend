@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -9,6 +9,31 @@ import { RouterModule } from '@angular/router';
   templateUrl: './featured-properties.component.html'
 })
 export class FeaturedPropertiesComponent {
+  @Input() showDeleteButton: boolean = false;
+  @Input() favoriteIds: number[] = [];
+  @Output() deleteFavorite = new EventEmitter<number>();
+  @Output() toggleFavorite = new EventEmitter<{ propertyId: number, isFavorite: boolean }>();
+
+  onDeleteClick(id: number, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.deleteFavorite.emit(id);
+  }
+
+  onToggleFavoriteClick(propertyId: number, event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    const isFav = this.isFavorite(propertyId);
+    this.toggleFavorite.emit({ propertyId, isFavorite: isFav });
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  isFavorite(propertyId: number): boolean {
+    return this.favoriteIds && this.favoriteIds.includes(propertyId);
+  }
   private _properties: any[] = [];
 
   formatImageUrl(url: string): string {

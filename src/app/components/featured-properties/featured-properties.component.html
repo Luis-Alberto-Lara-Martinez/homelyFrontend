@@ -27,6 +27,24 @@
           <div
             class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm text-brand-dark text-xs font-black uppercase tracking-widest px-3.5 py-1.5 rounded-full shadow-sm z-10">
             {{ prop.transaction === 'alquiler' ? 'Alquiler' : 'En Venta' }}</div>
+          <!-- Botón de eliminar directo (desde página de favoritos) -->
+          <button *ngIf="showDeleteButton" (click)="onDeleteClick(prop.id, $event)"
+            class="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-xl shadow-lg hover:bg-red-600 transition-colors z-20 cursor-pointer animate-fade-in" title="Eliminar de favoritos">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+          <!-- Botón de alternar favoritos (corazón vacío / lleno en catálogo) -->
+          <button *ngIf="!showDeleteButton && isLoggedIn()" (click)="onToggleFavoriteClick(prop.id, $event)"
+            class="absolute top-4 right-4 p-2.5 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg hover:bg-white hover:text-red-500 text-gray-400 transition-all duration-300 z-20 cursor-pointer transform hover:scale-105 active:scale-95 animate-fade-in"
+            [title]="isFavorite(prop.id) ? 'Eliminar de favoritos' : 'Añadir a favoritos'">
+            <svg class="w-5 h-5 transition-colors duration-300"
+                 [class.text-red-500]="isFavorite(prop.id)"
+                 [class.fill-red-500]="isFavorite(prop.id)"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
           <div
             class="absolute bottom-4 right-4 bg-gradient-brand text-white font-bold px-5 py-2.5 rounded-xl shadow-lg transform group-hover:-translate-y-1 transition-transform duration-300 z-10">
             {{ prop.price | currency:'EUR':'symbol':'1.0-0' }}{{ prop.transaction === 'alquiler' ? ' / mes' : '' }}

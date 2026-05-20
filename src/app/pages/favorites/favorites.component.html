@@ -1,0 +1,93 @@
+<div class="pt-20 bg-slate-50 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-extrabold text-brand-dark font-sans">Mis Favoritos</h1>
+        <p class="text-gray-500 mt-2">Explora las propiedades que has guardado para revisar más tarde.</p>
+      </div>
+      <div class="text-sm font-bold text-brand-blue bg-brand-blue/10 px-4 py-2 rounded-xl" *ngIf="!isLoading">
+        {{ favorites.length }} Propiedades
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State with Premium Glow (Exactamente igual que en /propiedades) -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-28">
+    <div class="relative flex items-center justify-center">
+      <!-- Outer glowing circle -->
+      <div class="absolute inset-0 bg-brand-blue/20 rounded-full blur-xl scale-150 animate-pulse"></div>
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-brand-blue shadow-xl"></div>
+    </div>
+  </div>
+
+  <!-- Content State -->
+  <div *ngIf="!isLoading">
+    <!-- Rejilla de Favoritos a través de featured-properties si no está vacía -->
+    <app-featured-properties [properties]="favorites" [showDeleteButton]="true" (deleteFavorite)="removeFavorite($event)" *ngIf="favorites.length > 0; else emptyState"></app-featured-properties>
+  </div>
+
+  <!-- Estado Vacío -->
+  <ng-template #emptyState>
+    <div class="bg-white rounded-3xl p-12 text-center border border-dashed border-gray-200 max-w-2xl mx-auto mt-12 mb-16 animate-fade-in shadow-sm">
+      <div class="w-24 h-24 bg-brand-blue/5 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-blue/60 shadow-inner">
+        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      </div>
+      <h2 class="text-2xl font-black text-brand-dark mb-2 font-sans">Tu lista está vacía</h2>
+      <p class="text-gray-500 mb-8 max-w-sm mx-auto font-medium">Parece que aún no has guardado ninguna propiedad en tus favoritos. ¡Explora nuestro catálogo y guarda las que más te gusten!</p>
+      <a routerLink="/propiedades" class="inline-flex items-center gap-2 bg-brand-blue text-white px-8 py-4 rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg shadow-brand-blue/30 active:scale-95">
+        Explorar Propiedades
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+      </a>
+    </div>
+  </ng-template>
+
+  <app-cta-banner></app-cta-banner>
+
+  <!-- Notificación Pop-up (Toast) -->
+  <div *ngIf="showToast" 
+       class="fixed top-24 right-8 animate-in slide-in-from-right-full duration-500"
+       style="z-index: 99999 !important;">
+      <div [ngClass]="{
+              'border-green-100 text-green-800 shadow-green-100/50': toastType === 'success',
+              'border-red-100 text-red-800 shadow-red-100/50': toastType === 'error',
+              'border-brand-blue/20 text-brand-blue shadow-brand-blue/10': toastType === 'loading'
+           }"
+           class="flex items-center gap-4 p-5 rounded-2xl border shadow-2xl min-w-[320px]"
+           style="background-color: #ffffff !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;">
+          
+          <!-- Icono Éxito -->
+          <div *ngIf="toastType === 'success'" class="flex-shrink-0 w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+          </div>
+
+          <!-- Icono Error -->
+          <div *ngIf="toastType === 'error'" class="flex-shrink-0 w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+          </div>
+
+          <!-- Icono Carga -->
+          <div *ngIf="toastType === 'loading'" class="flex-shrink-0 w-12 h-12 bg-brand-blue/5 rounded-xl flex items-center justify-center text-brand-blue">
+              <div class="animate-spin rounded-full h-6 w-6 border-2 border-brand-blue border-t-transparent"></div>
+          </div>
+
+          <div class="flex-grow">
+              <p class="text-sm font-black uppercase tracking-wider mb-0.5">
+                  {{ toastType === 'success' ? 'Completado' : (toastType === 'error' ? 'Error' : 'Procesando') }}
+              </p>
+              <p class="text-sm font-medium opacity-80">{{ toastMessage }}</p>
+          </div>
+
+          <button (click)="showToast = false" class="text-gray-400 hover:text-gray-600 p-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+          </button>
+      </div>
+  </div>
+</div>
