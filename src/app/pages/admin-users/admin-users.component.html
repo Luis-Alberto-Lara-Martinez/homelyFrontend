@@ -341,7 +341,7 @@
           <select [(ngModel)]="newUser.role"
             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-4 focus:ring-brand-blue/10 focus:border-brand-blue outline-none transition-all text-sm font-medium text-brand-dark appearance-none">
             <option value="" disabled>Seleccionar...</option>
-            <option *ngFor="let role of roles" [value]="role.name">{{role.name}}</option>
+            <option *ngFor="let role of roles" [value]="role.name" class="uppercase">{{role.name}}</option>
           </select>
         </div>
         <div>
@@ -349,7 +349,7 @@
           <select [(ngModel)]="newUser.status"
             class="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:ring-4 focus:ring-brand-blue/10 focus:border-brand-blue outline-none transition-all text-sm font-medium text-brand-dark appearance-none">
             <option value="" disabled>Seleccionar...</option>
-            <option *ngFor="let stat of statuses" [value]="stat.name">{{stat.name}}</option>
+            <option *ngFor="let stat of statuses" [value]="stat.name" class="uppercase">{{stat.name}}</option>
           </select>
         </div>
       </div>

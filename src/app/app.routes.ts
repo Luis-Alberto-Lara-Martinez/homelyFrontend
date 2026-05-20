@@ -68,7 +68,7 @@ export const routes: Routes = [
     title: 'Homely - Calculadora de Hipotecas'
   },
   {
-    path: 'vender',
+    path: 'admin/propiedad/crear',
     component: VentasComponent,
     canActivate: [authGuard], // ← Protegida
     title: 'Homely - Publica tu anuncio'

@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
   imports: [CommonModule, FormsModule],
   templateUrl: './ventas.component.html'
 })
-export class VentasComponent implements OnDestroy {
+export class VentasComponent implements OnInit, OnDestroy {
   private propertiesService = inject(Properties);
   private router = inject(Router);
 
@@ -23,8 +23,8 @@ export class VentasComponent implements OnDestroy {
 
   // Form Data
   formData = {
-    tipoVivienda: 'casa',
-    operacion: 'venta',
+    tipoVivienda: '',
+    operacion: '',
     titulo: '',
     direccion: '',
     ciudad: '',
@@ -58,12 +58,21 @@ export class VentasComponent implements OnDestroy {
   isSearchingLocation = false;
   locationError = '';
 
-  tiposVivienda = [
-    { id: 'casa', nombre: 'Casa o Chalet', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
-    { id: 'apartamento', nombre: 'Apartamento', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-    { id: 'garaje', nombre: 'Garaje', icon: 'M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6M8 14h8m-4-4v8' },
-    { id: 'trastero', nombre: 'Trastero', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' }
-  ];
+  isGeneratingDescription = false;
+  descriptionError = '';
+
+  tiposVivienda: any[] = [];
+  transacciones: any[] = [];
+
+  // Icon map to preserve local icons when backend doesn't provide them
+  private ICON_MAP: Record<string, string> = {
+    casa: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
+    apartamento: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    garaje: 'M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6M8 14h8m-4-4v8',
+    trastero: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
+  };
+
+  extras: any[] = [];
 
   getStepTitle(): string {
     switch (this.currentStep) {
@@ -73,6 +82,58 @@ export class VentasComponent implements OnDestroy {
       case 4: return 'Detalles comerciales del anuncio';
       default: return '';
     }
+  }
+
+  ngOnInit(): void {
+    this.loadTypesAndTransactions();
+  }
+
+  private loadTypesAndTransactions() {
+    // Cargar tipos de inmueble
+    this.propertiesService.getAllPropertyTypes().subscribe({
+      next: (results: any[]) => {
+        this.tiposVivienda = (results || []).map(item => {
+          if (typeof item === 'string') return { id: item, nombre: item, name: item, icon: this.ICON_MAP[item] || '' };
+          const id = item.id ?? item.code ?? item.name ?? item.key ?? '';
+          const nombre = item.name ?? item.label ?? item.displayName ?? id;
+          return { id, nombre, name: item.name ?? nombre, icon: item.icon ?? this.ICON_MAP[id] ?? '' };
+        });
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando tipos de inmueble:', err);
+        // fallback local por si hay error
+        this.tiposVivienda = [
+          { id: 'casa', nombre: 'Casa o Chalet', name: 'casa', icon: this.ICON_MAP['casa'] },
+          { id: 'apartamento', nombre: 'Apartamento', name: 'apartamento', icon: this.ICON_MAP['apartamento'] },
+          { id: 'garaje', nombre: 'Garaje', name: 'garaje', icon: this.ICON_MAP['garaje'] },
+          { id: 'trastero', nombre: 'Trastero', name: 'trastero', icon: this.ICON_MAP['trastero'] }
+        ];
+        this.cdr.detectChanges();
+      }
+    });
+
+    // Cargar transacciones
+    this.propertiesService.getAllPropertyTransactions().subscribe({
+      next: (results: any[]) => {
+        this.transacciones = (results || []).map(item => {
+          if (typeof item === 'string') return { id: item, nombre: item, name: item };
+          const id = item.id ?? item.code ?? item.name ?? item.key ?? '';
+          const nombre = item.name ?? item.label ?? item.displayName ?? id;
+          return { id, nombre, name: item.name ?? nombre };
+        });
+        // keep default if none provided
+        if (!this.transacciones || this.transacciones.length === 0) {
+          this.transacciones = [{ id: 'venta', nombre: 'Venta', name: 'venta' }, { id: 'alquiler', nombre: 'Alquiler', name: 'alquiler' }];
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando transacciones:', err);
+        this.transacciones = [{ id: 'venta', nombre: 'Venta', name: 'venta' }, { id: 'alquiler', nombre: 'Alquiler', name: 'alquiler' }];
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   isStepValid(step: number): boolean {
@@ -113,8 +174,80 @@ export class VentasComponent implements OnDestroy {
     }
   }
 
-  selectTipoVivienda(tipo: string) {
+  selectTipoVivienda(tipo: any) {
     this.formData.tipoVivienda = tipo;
+    this.loadExtras(tipo);
+  }
+
+  loadExtras(typeId: any) {
+    const numericId = Number(typeId);
+    if (!isNaN(numericId)) {
+      this.propertiesService.getAllExtrasByTypeId(numericId).subscribe({
+        next: (extras: any[]) => {
+          this.extras = (extras || []).map(e => ({ ...e, selected: false }));
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading extras:', err);
+          this.extras = [];
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      this.extras = [];
+    }
+  }
+
+  isResidence(): boolean {
+    const selectedType = this.tiposVivienda.find(t => t.id === this.formData.tipoVivienda);
+    if (!selectedType) return false;
+    const name = (selectedType.nombre || selectedType.name || selectedType.id || '').toLowerCase();
+    return name === 'casa' || name === 'apartamento' || name === 'residencia';
+  }
+
+  generarDescripcionIA() {
+    this.isGeneratingDescription = true;
+    this.descriptionError = '';
+
+    const selectedExtras = this.extras.filter(e => e.selected).map(e => e.name);
+    const selectedType = this.tiposVivienda.find(t => t.id === this.formData.tipoVivienda);
+    const typeName = selectedType ? (selectedType.nombre || selectedType.name) : this.formData.tipoVivienda;
+    const selectedTransaction = this.transacciones.find(t => t.id === this.formData.operacion);
+    const transactionName = selectedTransaction ? (selectedTransaction.nombre || selectedTransaction.name) : this.formData.operacion;
+
+    const payload = {
+      type: typeName,
+      transaction: transactionName,
+      address: this.formData.direccion,
+      city: this.formData.ciudad,
+      surface: this.formData.metros,
+      bedrooms: this.isResidence() ? this.formData.habitaciones : null,
+      bathrooms: this.isResidence() ? this.formData.banos : null,
+      extras: selectedExtras
+    };
+
+    this.propertiesService.generateDescription(payload).subscribe({
+      next: (res: any) => {
+        this.isGeneratingDescription = false;
+        if (res && typeof res === 'string') {
+          this.formData.descripcion = res;
+        } else if (res && typeof res.description === 'string') {
+          this.formData.descripcion = res.description;
+        } else if (res && typeof res.result === 'string') {
+          this.formData.descripcion = res.result;
+        } else {
+          console.warn('Estructura de respuesta inesperada:', res);
+          this.formData.descripcion = JSON.stringify(res);
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al generar descripción con IA:', err);
+        this.descriptionError = 'No se pudo generar la descripción. Compruebe que el servicio de IA esté disponible.';
+        this.isGeneratingDescription = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private cdr = inject(ChangeDetectorRef);
@@ -259,6 +392,26 @@ export class VentasComponent implements OnDestroy {
   isSubmitting = false;
   submitError = '';
 
+  private buildFormData(formData: FormData, data: any, parentKey?: string) {
+    if (data === null || data === undefined) {
+      return;
+    }
+
+    if (data instanceof File) {
+      formData.append(parentKey!, data);
+    } else if (Array.isArray(data)) {
+      data.forEach((element, index) => {
+        this.buildFormData(formData, element, `${parentKey}[${index}]`);
+      });
+    } else if (typeof data === 'object') {
+      Object.keys(data).forEach(key => {
+        this.buildFormData(formData, data[key], parentKey ? `${parentKey}.${key}` : key);
+      });
+    } else {
+      formData.append(parentKey!, data.toString());
+    }
+  }
+
   publicarAnuncio() {
     if (!this.isStepValid(this.currentStep)) return;
 
@@ -279,55 +432,56 @@ export class VentasComponent implements OnDestroy {
       longitude: parseFloat(this.formData.longitud)
     };
 
-    const residenceDto = (this.formData.tipoVivienda === 'casa' || this.formData.tipoVivienda === 'apartamento') ? {
+    const residenceDto = this.isResidence() ? {
       bedrooms: this.formData.habitaciones,
       bathrooms: this.formData.banos,
       conservation: 'Bueno',
       orientation: 'Norte'
     } : null;
 
-    const extrasList: any[] = [];
-    if (this.formData.tipoVivienda === 'casa' || this.formData.tipoVivienda === 'apartamento') {
-      if (this.formData.extrasCasa.garaje) extrasList.push({ id: null, name: 'garaje' });
-      if (this.formData.extrasCasa.piscina) extrasList.push({ id: null, name: 'piscina' });
-      if (this.formData.extrasCasa.ascensor) extrasList.push({ id: null, name: 'ascensor' });
-      if (this.formData.extrasCasa.terraza) extrasList.push({ id: null, name: 'terraza' });
-    } else if (this.formData.tipoVivienda === 'garaje') {
-      if (this.formData.extrasGaraje.cubierto) extrasList.push({ id: null, name: 'cubierto' });
-      if (this.formData.extrasGaraje.seguridad24h) extrasList.push({ id: null, name: 'seguridad24h' });
-      if (this.formData.extrasGaraje.puertaAutomatica) extrasList.push({ id: null, name: 'puertaAutomatica' });
-    } else if (this.formData.tipoVivienda === 'trastero') {
-      if (this.formData.extrasTrastero.acceso24h) extrasList.push({ id: null, name: 'acceso24h' });
-      if (this.formData.extrasTrastero.seguridad) extrasList.push({ id: null, name: 'seguridad' });
-      if (this.formData.extrasTrastero.estanterias) extrasList.push({ id: null, name: 'estanterias' });
-    }
+    const extrasList = this.extras
+      .filter(e => e.selected)
+      .map(e => ({ id: e.id, name: e.name }));
+
+    const selectedType = this.tiposVivienda.find(t => t.id === this.formData.tipoVivienda);
+    const typeValue = selectedType ? (selectedType.name || selectedType.nombre || this.formData.tipoVivienda) : this.formData.tipoVivienda;
+
+    const selectedTransaction = this.transacciones.find(t => t.id === this.formData.operacion);
+    const transactionValue = selectedTransaction ? (selectedTransaction.name || selectedTransaction.nombre || this.formData.operacion) : this.formData.operacion;
+
+    const imagesPayload = this.selectedImages.map((imgObj, index) => ({
+      image: imgObj.file,
+      displayOrder: index + 1
+    }));
 
     const payload = {
-      type: this.formData.tipoVivienda,
-      status: 'Disponible',
-      transaction: this.formData.operacion,
+      type: typeValue,
+      status: 'disponible',
+      transaction: transactionValue,
       title: this.formData.titulo,
       description: this.formData.descripcion,
       surface: parseInt(this.formData.metros),
       price: parseFloat(this.formData.precio),
-      updatedBy: null,
-      images: [],
+      images: imagesPayload,
       extras: extrasList,
       address: addressDto,
       residence: residenceDto,
-      energyCertificate: {
+      energyCertificate: this.isResidence() ? {
         hasCertificate: false,
         consumptionScale: 'G',
         consumptionValue: 0,
         emissionsScale: 'G',
         emissionsValue: 0
-      }
+      } : null
     };
 
-    this.propertiesService.createProperty(payload).subscribe({
+    const formData = new FormData();
+    this.buildFormData(formData, payload);
+
+    this.propertiesService.createProperty(formData).subscribe({
       next: () => {
         this.isSubmitting = false;
-        this.router.navigate(['/admin/properties']);
+        this.router.navigate(['/admin/propiedades'], { queryParams: { success: 'true' } });
       },
       error: (err) => {
         console.error('Error al registrar la propiedad:', err);

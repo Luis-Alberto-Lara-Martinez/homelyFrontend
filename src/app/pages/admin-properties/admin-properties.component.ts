@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Properties } from '../../services/properties/properties';
 
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 
 // Triggering build
 @Component({
@@ -35,11 +35,17 @@ export class AdminPropertiesComponent implements OnInit {
 
   constructor(
     private propertiesService: Properties,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
     this.loadProperties();
+    this.route.queryParams.subscribe(params => {
+      if (params['success'] === 'true') {
+        this.showToast('Propiedad guardada correctamente.', 'success');
+      }
+    });
   }
 
   loadProperties(page: number = 1) {

@@ -90,6 +90,18 @@ export class Properties {
     return this.http.get<any[]>(`${this.baseUrl}/transactions`, { headers });
   }
 
+  getAllExtrasByTypeId(typeId: number): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any[]>(`${environment.backendUrl}/admin/extras/${typeId}`, { headers });
+  }
+
+  generateDescription(propertyData: any): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.post<any>(`${environment.backendUrl}/admin/property/generate-description`, propertyData, { headers });
+  }
+
   sendContactRequest(requestData: { email: string, name: string, message: string }): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
