@@ -60,4 +60,9 @@ export class FeaturedPropertiesComponent {
   get properties(): any[] {
     return this._properties;
   }
+
+  showRoomsAndBaths(prop: any): boolean {
+    const type = (prop.type || prop.tipoVivienda || prop.residence?.type || '').toLowerCase();
+    return type !== 'garaje' && type !== 'trastero';
+  }
 }

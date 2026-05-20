@@ -34,7 +34,7 @@ export class PropertiesComponent implements OnInit {
   private circle: any;
 
   // Filtros de búsqueda
-  filterKeyword: string = '';
+
   filterTransaction: string = '';
   filterType: string = '';
   filterMinPrice: number | null = null;
@@ -47,11 +47,7 @@ export class PropertiesComponent implements OnInit {
   filterBaths: string = '';
   filterMinSize: number | null = null;
   filterMaxSize: number | null = null;
-  filterHasPool: boolean = false;
-  filterHasGarden: boolean = false;
-  filterHasTerrace: boolean = false;
-  filterHasElevator: boolean = false;
-  filterHasAC: boolean = false;
+
 
   // Estado para Dropdowns personalizados
   activeDropdown: string | null = null;
@@ -156,11 +152,7 @@ export class PropertiesComponent implements OnInit {
     if (this.filterBaths) count++;
     if (this.filterMinSize !== null) count++;
     if (this.filterMaxSize !== null) count++;
-    if (this.filterHasPool) count++;
-    if (this.filterHasGarden) count++;
-    if (this.filterHasTerrace) count++;
-    if (this.filterHasElevator) count++;
-    if (this.filterHasAC) count++;
+
     return count;
   }
 
@@ -277,27 +269,6 @@ export class PropertiesComponent implements OnInit {
 
   applyFilters() {
     let filtered = this.allProperties.filter((prop: any) => {
-      // 0. Filtrar por Palabra Clave (Buscador Superior)
-      if (this.filterKeyword) {
-        const query = this.filterKeyword.toLowerCase().trim();
-        const title = (prop.title || '').toLowerCase();
-        const desc = (prop.description || prop.descripcion || '').toLowerCase();
-        let addressStr = '';
-        if (prop.address) {
-          if (typeof prop.address === 'object') {
-            addressStr = `${prop.address.street || ''} ${prop.address.city || ''} ${prop.address.province || ''}`.toLowerCase();
-          } else {
-            addressStr = prop.address.toLowerCase();
-          }
-        } else if (prop.location) {
-          addressStr = prop.location.toLowerCase();
-        }
-        
-        if (!title.includes(query) && !desc.includes(query) && !addressStr.includes(query)) {
-          return false;
-        }
-      }
-
       // 1. Filtrar por Operación (Venta / Alquiler)
       if (this.filterTransaction) {
         const propTrans = (prop.transaction || prop.operacion || prop.status || '').toLowerCase();
@@ -355,33 +326,7 @@ export class PropertiesComponent implements OnInit {
         return false;
       }
 
-      // 4d. Filtrar por Extras/Comodidades (Filtros Adicionales)
-      const desc = (prop.description || prop.descripcion || '').toLowerCase();
 
-      if (this.filterHasPool) {
-        const hasPool = prop.residence?.pool || prop.pool || prop.hasPool || desc.includes('piscina');
-        if (!hasPool) return false;
-      }
-
-      if (this.filterHasGarden) {
-        const hasGarden = prop.residence?.garden || prop.garden || prop.hasGarden || desc.includes('jardín') || desc.includes('jardin');
-        if (!hasGarden) return false;
-      }
-
-      if (this.filterHasTerrace) {
-        const hasTerrace = prop.residence?.terrace || prop.terrace || prop.hasTerrace || desc.includes('terraza');
-        if (!hasTerrace) return false;
-      }
-
-      if (this.filterHasElevator) {
-        const hasElevator = prop.residence?.elevator || prop.elevator || prop.hasElevator || desc.includes('ascensor');
-        if (!hasElevator) return false;
-      }
-
-      if (this.filterHasAC) {
-        const hasAC = prop.residence?.ac || prop.ac || prop.hasAc || desc.includes('aire') || desc.includes('climatizado');
-        if (!hasAC) return false;
-      }
 
       return true;
     });
@@ -407,7 +352,6 @@ export class PropertiesComponent implements OnInit {
   }
 
   resetFilters() {
-    this.filterKeyword = '';
     this.filterTransaction = '';
     this.filterType = '';
     this.filterMinPrice = null;
@@ -417,21 +361,8 @@ export class PropertiesComponent implements OnInit {
     this.filterBaths = '';
     this.filterMinSize = null;
     this.filterMaxSize = null;
-    this.filterHasPool = false;
-    this.filterHasGarden = false;
-    this.filterHasTerrace = false;
-    this.filterHasElevator = false;
-    this.filterHasAC = false;
 
-    // Resetear ubicación y mapa
-    this.location = '';
-    this.selectedLatitude = null;
-    this.selectedLongitude = null;
-    this.distance = 2;
-    this.searchQuery = '';
-    this.tempLocationData = null;
-
-    this.loadAllProperties();
+    this.applyFilters();
   }
 
   openMapModal() {

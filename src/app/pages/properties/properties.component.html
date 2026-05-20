@@ -13,58 +13,51 @@
 
   <!-- Filter Bar (Solo se muestra cuando ya ha cargado) -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12" *ngIf="!isLoading && allProperties.length > 0">
-    
+
     <!-- Title and Sort Dropdown aligned on the same row -->
-    <div class="flex items-center justify-between mb-5 ml-2 animate-in fade-in slide-in-from-left-4 duration-700">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center text-white shadow-md shadow-brand-blue/20">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
-        </div>
-        <h3 class="text-xl font-extrabold text-brand-dark tracking-tight font-sans">Filtros Avanzados</h3>
-      </div>
+    <div class="flex items-center justify-end mb-5 ml-2 animate-in fade-in slide-in-from-left-4 duration-700">
 
       <!-- Custom Dropdown with Gradient style aligned on the right -->
       <div class="relative">
-        <button type="button" (click)="toggleDropdown('sort', $event)" 
+        <button type="button" (click)="toggleDropdown('sort', $event)"
           class="bg-gradient-brand text-white font-bold rounded-2xl px-6 py-3 shadow-md shadow-brand-blue/20 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center gap-3 cursor-pointer text-sm">
           <span>Ordenar por: {{ getDisplayValue('sort') }}</span>
-          <svg class="w-4 h-4 text-white flex-shrink-0 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'sort'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+          <svg class="w-4 h-4 text-white flex-shrink-0 transition-transform duration-200"
+            [class.rotate-180]="activeDropdown === 'sort'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+          </svg>
         </button>
-        
+
         <!-- Dropdown Menu -->
-        <div *ngIf="activeDropdown === 'sort'" 
+        <div *ngIf="activeDropdown === 'sort'"
           class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl shadow-brand-dark/10 border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
           <button *ngFor="let opt of sortOptions" (click)="selectOption('sort', opt.value, $event)"
             class="w-full text-left px-5 py-3 hover:bg-brand-blue/5 text-sm font-semibold transition-colors flex items-center justify-between text-gray-700"
             [class.text-brand-blue]="filterSort === opt.value" [class.bg-brand-blue/5]="filterSort === opt.value">
             {{ opt.label }}
-            <svg *ngIf="filterSort === opt.value" class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            <svg *ngIf="filterSort === opt.value" class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
           </button>
         </div>
       </div>
     </div>
-    <!-- Main Container styled in alignment with the Homely Design System -->
+
+    <!-- Main Container styled in alignment with the Homely Design System -->
     <div class="flex flex-col gap-4 animate-in fade-in slide-in-from-top-8 duration-700">
-      
+
       <!-- Buscador Principal (Fila Superior) -->
-      <div class="bg-white rounded-3xl p-5 shadow-xl shadow-brand-dark/5 border border-gray-100 flex flex-col md:flex-row items-center gap-5 hover:shadow-2xl hover:shadow-brand-blue/5 transition-shadow duration-500">
-        <!-- Input de Palabra Clave -->
-        <div class="relative flex-1 w-full group">
-          <span class="absolute inset-y-0 left-0 flex items-center pl-5 text-gray-400 group-focus-within:text-brand-blue transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </span>
-          <input type="text" [(ngModel)]="filterKeyword" (ngModelChange)="applyFilters()"
-            placeholder="Buscar por palabra clave, título o zona..."
-            class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-14 pr-5 py-4 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
-        </div>
+      <div
+        class="bg-white rounded-3xl p-5 shadow-xl shadow-brand-dark/5 border border-gray-100 flex md:flex-row items-center gap-5 hover:shadow-2xl hover:shadow-brand-blue/5 transition-shadow duration-500">
+
 
         <!-- Botón de Ubicación en Mapa -->
         <div class="relative w-full md:w-72">
           <button type="button" (click)="openMapModal()"
             class="w-full bg-gray-50 border border-gray-100 hover:border-brand-blue/30 text-brand-dark hover:bg-white font-semibold rounded-2xl pl-5 pr-12 py-4 text-left focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all cursor-pointer shadow-sm truncate text-sm">
-            <span [class.text-brand-blue]="location" class="font-bold">{{ location ? location : 'Seleccionar en mapa...' }}</span>
+            <span [class.text-brand-blue]="location" class="font-bold">{{ location ? location : 'Seleccionar en mapa...'
+              }}</span>
             <span class="absolute right-4 top-1/2 -translate-y-1/2 text-brand-blue">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -81,11 +74,13 @@
           <!-- Toggle Filtros Avanzados -->
           <button type="button" (click)="showExtraFilters = !showExtraFilters"
             class="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-brand-blue/5 hover:bg-brand-blue/10 border border-brand-blue/10 text-brand-blue font-bold text-sm transition-all duration-300 active:scale-95 cursor-pointer">
-            <svg class="w-4 h-4 transition-transform duration-300" [class.rotate-180]="showExtraFilters" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 transition-transform duration-300" [class.rotate-180]="showExtraFilters" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
             </svg>
             <span>Filtros</span>
-            <span *ngIf="getActiveFiltersCount() > 0" class="bg-brand-blue text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-extrabold animate-pulse">
+            <span *ngIf="getActiveFiltersCount() > 0"
+              class="bg-brand-blue text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-extrabold animate-pulse">
               {{ getActiveFiltersCount() }}
             </span>
           </button>
@@ -94,7 +89,8 @@
           <button (click)="resetFilters()" title="Limpiar todos los filtros"
             class="w-14 h-14 rounded-2xl bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 border border-gray-100 flex items-center justify-center transition-all duration-300 active:scale-95 cursor-pointer">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
         </div>
@@ -103,24 +99,34 @@
       <!-- Desplegable con el Resto de Filtros (Fila Inferior - Collapsible con Grid Premium) -->
       <div *ngIf="showExtraFilters"
         class="bg-white rounded-3xl p-6 shadow-xl shadow-brand-dark/5 border border-gray-100 animate-in slide-in-from-top-4 fade-in duration-300">
-        
+
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Transacción -->
           <div class="relative">
-            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Transacción</label>
+            <label
+              class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Transacción</label>
             <div class="relative">
-              <button type="button" (click)="toggleDropdown('transaction', $event)" 
+              <button type="button" (click)="toggleDropdown('transaction', $event)"
                 class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl px-4 py-3.5 text-left focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all cursor-pointer shadow-sm flex items-center justify-between text-sm">
-                <span class="truncate" [class.text-brand-blue]="filterTransaction !== ''">{{ getDisplayValue('transaction') }}</span>
-                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'transaction'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <span class="truncate" [class.text-brand-blue]="filterTransaction !== ''">{{
+                  getDisplayValue('transaction') }}</span>
+                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200"
+                  [class.rotate-180]="activeDropdown === 'transaction'" fill="none" stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
               </button>
-              <div *ngIf="activeDropdown === 'transaction'" 
+              <div *ngIf="activeDropdown === 'transaction'"
                 class="absolute top-full left-0 mt-2 w-full bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                 <button *ngFor="let opt of transactionOptions" (click)="selectOption('transaction', opt.value, $event)"
                   class="w-full text-left px-4 py-2.5 hover:bg-brand-blue/5 text-xs font-semibold transition-colors flex items-center justify-between"
-                  [class.text-brand-blue]="filterTransaction === opt.value" [class.bg-brand-blue/5]="filterTransaction === opt.value">
+                  [class.text-brand-blue]="filterTransaction === opt.value"
+                  [class.bg-brand-blue/5]="filterTransaction === opt.value">
                   {{ opt.label.substring(0, 1).toUpperCase() + opt.label.slice(1) }}
-                  <svg *ngIf="filterTransaction === opt.value" class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                  <svg *ngIf="filterTransaction === opt.value" class="w-4 h-4 text-brand-blue" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -128,20 +134,27 @@
 
           <!-- Tipo de Inmueble -->
           <div class="relative">
-            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Tipo de Inmueble</label>
+            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Tipo de
+              Inmueble</label>
             <div class="relative">
-              <button type="button" (click)="toggleDropdown('type', $event)" 
+              <button type="button" (click)="toggleDropdown('type', $event)"
                 class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl px-4 py-3.5 text-left focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all cursor-pointer shadow-sm flex items-center justify-between text-sm">
                 <span class="truncate" [class.text-brand-blue]="filterType !== ''">{{ getDisplayValue('type') }}</span>
-                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'type'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200"
+                  [class.rotate-180]="activeDropdown === 'type'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
               </button>
-              <div *ngIf="activeDropdown === 'type'" 
+              <div *ngIf="activeDropdown === 'type'"
                 class="absolute top-full left-0 mt-2 w-full bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                 <button *ngFor="let opt of typeOptions" (click)="selectOption('type', opt.value, $event)"
                   class="w-full text-left px-4 py-2.5 hover:bg-brand-blue/5 text-xs font-semibold transition-colors flex items-center justify-between"
                   [class.text-brand-blue]="filterType === opt.value" [class.bg-brand-blue/5]="filterType === opt.value">
                   {{ opt.label.substring(0, 1).toUpperCase() + opt.label.slice(1) }}
-                  <svg *ngIf="filterType === opt.value" class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                  <svg *ngIf="filterType === opt.value" class="w-4 h-4 text-brand-blue" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -149,36 +162,50 @@
 
           <!-- Presupuesto -->
           <div class="relative sm:col-span-2">
-            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Presupuesto</label>
+            <label
+              class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Presupuesto</label>
             <div class="flex items-center gap-3">
               <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Mín</span>
-                <input type="number" [(ngModel)]="filterMinPrice" (ngModelChange)="applyFilters()" placeholder="0 €" min="0" class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Mín</span>
+                <input type="number" [(ngModel)]="filterMinPrice" (ngModelChange)="applyFilters()" placeholder="0 €"
+                  min="0"
+                  class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
               </div>
               <span class="text-gray-300 font-bold">-</span>
               <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Máx</span>
-                <input type="number" [(ngModel)]="filterMaxPrice" (ngModelChange)="applyFilters()" placeholder="Sin límite" min="0" class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Máx</span>
+                <input type="number" [(ngModel)]="filterMaxPrice" (ngModelChange)="applyFilters()"
+                  placeholder="Sin límite" min="0"
+                  class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
               </div>
             </div>
           </div>
 
           <!-- Habitaciones -->
           <div class="relative" *ngIf="filterType === '' || filterType === 'residencia'">
-            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Habitaciones</label>
+            <label
+              class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Habitaciones</label>
             <div class="relative">
-              <button type="button" (click)="toggleDropdown('beds', $event)" 
+              <button type="button" (click)="toggleDropdown('beds', $event)"
                 class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl px-4 py-3.5 text-left focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all cursor-pointer shadow-sm flex items-center justify-between text-sm">
                 <span class="truncate" [class.text-brand-blue]="filterBeds !== ''">{{ getDisplayValue('beds') }}</span>
-                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'beds'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200"
+                  [class.rotate-180]="activeDropdown === 'beds'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
               </button>
-              <div *ngIf="activeDropdown === 'beds'" 
+              <div *ngIf="activeDropdown === 'beds'"
                 class="absolute top-full left-0 mt-2 w-full bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                 <button *ngFor="let opt of bedsOptions" (click)="selectOption('beds', opt.value, $event)"
                   class="w-full text-left px-4 py-2.5 hover:bg-brand-blue/5 text-xs font-semibold transition-colors flex items-center justify-between"
                   [class.text-brand-blue]="filterBeds === opt.value" [class.bg-brand-blue/5]="filterBeds === opt.value">
                   {{ opt.label }}
-                  <svg *ngIf="filterBeds === opt.value" class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                  <svg *ngIf="filterBeds === opt.value" class="w-4 h-4 text-brand-blue" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -188,18 +215,26 @@
           <div class="relative" *ngIf="filterType === '' || filterType === 'residencia'">
             <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Baños</label>
             <div class="relative">
-              <button type="button" (click)="toggleDropdown('baths', $event)" 
+              <button type="button" (click)="toggleDropdown('baths', $event)"
                 class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl px-4 py-3.5 text-left focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all cursor-pointer shadow-sm flex items-center justify-between text-sm">
-                <span class="truncate" [class.text-brand-blue]="filterBaths !== ''">{{ getDisplayValue('baths') }}</span>
-                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200" [class.rotate-180]="activeDropdown === 'baths'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <span class="truncate" [class.text-brand-blue]="filterBaths !== ''">{{ getDisplayValue('baths')
+                  }}</span>
+                <svg class="w-4 h-4 text-brand-blue flex-shrink-0 transition-transform duration-200"
+                  [class.rotate-180]="activeDropdown === 'baths'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
               </button>
-              <div *ngIf="activeDropdown === 'baths'" 
+              <div *ngIf="activeDropdown === 'baths'"
                 class="absolute top-full left-0 mt-2 w-full bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                 <button *ngFor="let opt of bathsOptions" (click)="selectOption('baths', opt.value, $event)"
                   class="w-full text-left px-4 py-2.5 hover:bg-brand-blue/5 text-xs font-semibold transition-colors flex items-center justify-between"
-                  [class.text-brand-blue]="filterBaths === opt.value" [class.bg-brand-blue/5]="filterBaths === opt.value">
+                  [class.text-brand-blue]="filterBaths === opt.value"
+                  [class.bg-brand-blue/5]="filterBaths === opt.value">
                   {{ opt.label }}
-                  <svg *ngIf="filterBaths === opt.value" class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                  <svg *ngIf="filterBaths === opt.value" class="w-4 h-4 text-brand-blue" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -207,77 +242,27 @@
 
           <!-- Superficie -->
           <div class="relative sm:col-span-2">
-            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Superficie (m²)</label>
+            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Superficie
+              (m²)</label>
             <div class="flex items-center gap-3">
               <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Mín</span>
-                <input type="number" [(ngModel)]="filterMinSize" (ngModelChange)="applyFilters()" placeholder="Ej. 60" min="0" class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Mín</span>
+                <input type="number" [(ngModel)]="filterMinSize" (ngModelChange)="applyFilters()" placeholder="Ej. 60"
+                  min="0"
+                  class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
               </div>
               <span class="text-gray-300 font-bold">-</span>
               <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Máx</span>
-                <input type="number" [(ngModel)]="filterMaxSize" (ngModelChange)="applyFilters()" placeholder="Sin límite" min="0" class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
+                <span
+                  class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-brand-blue font-bold text-xs">Máx</span>
+                <input type="number" [(ngModel)]="filterMaxSize" (ngModelChange)="applyFilters()"
+                  placeholder="Sin límite" min="0"
+                  class="w-full bg-gray-50 border border-gray-100 text-brand-dark font-semibold rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue/50 transition-all placeholder-gray-400/80 shadow-sm text-sm">
               </div>
             </div>
           </div>
-
-          <!-- Comodidades / Extras Checklist -->
-          <div class="sm:col-span-2 lg:col-span-4 mt-2">
-            <label class="text-[11px] font-bold text-gray-400 uppercase tracking-widest block mb-4 ml-1">Comodidades y Extras</label>
-            <div class="flex flex-wrap gap-x-6 gap-y-4 px-2">
-              <!-- Piscina -->
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" [(ngModel)]="filterHasPool" (ngModelChange)="applyFilters()" class="hidden">
-                <div class="w-5 h-5 rounded-md border bg-white flex items-center justify-center transition-all duration-200 group-hover:border-brand-blue/50 group-hover:shadow-md"
-                  [class.bg-brand-blue]="filterHasPool" [class.border-brand-blue]="filterHasPool" [class.border-gray-200]="!filterHasPool" [class.shadow-md]="filterHasPool" [class.shadow-brand-blue/20]="filterHasPool">
-                  <svg *ngIf="filterHasPool" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <span class="text-sm font-bold text-gray-600 group-hover:text-brand-blue transition-colors select-none">Piscina</span>
-              </label>
-
-              <!-- Jardín -->
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" [(ngModel)]="filterHasGarden" (ngModelChange)="applyFilters()" class="hidden">
-                <div class="w-5 h-5 rounded-md border bg-white flex items-center justify-center transition-all duration-200 group-hover:border-brand-blue/50 group-hover:shadow-md"
-                  [class.bg-brand-blue]="filterHasGarden" [class.border-brand-blue]="filterHasGarden" [class.border-gray-200]="!filterHasGarden" [class.shadow-md]="filterHasGarden" [class.shadow-brand-blue/20]="filterHasGarden">
-                  <svg *ngIf="filterHasGarden" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <span class="text-sm font-bold text-gray-600 group-hover:text-brand-blue transition-colors select-none">Jardín</span>
-              </label>
-
-              <!-- Terraza -->
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" [(ngModel)]="filterHasTerrace" (ngModelChange)="applyFilters()" class="hidden">
-                <div class="w-5 h-5 rounded-md border bg-white flex items-center justify-center transition-all duration-200 group-hover:border-brand-blue/50 group-hover:shadow-md"
-                  [class.bg-brand-blue]="filterHasTerrace" [class.border-brand-blue]="filterHasTerrace" [class.border-gray-200]="!filterHasTerrace" [class.shadow-md]="filterHasTerrace" [class.shadow-brand-blue/20]="filterHasTerrace">
-                  <svg *ngIf="filterHasTerrace" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <span class="text-sm font-bold text-gray-600 group-hover:text-brand-blue transition-colors select-none">Terraza</span>
-              </label>
-
-              <!-- Ascensor -->
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" [(ngModel)]="filterHasElevator" (ngModelChange)="applyFilters()" class="hidden">
-                <div class="w-5 h-5 rounded-md border bg-white flex items-center justify-center transition-all duration-200 group-hover:border-brand-blue/50 group-hover:shadow-md"
-                  [class.bg-brand-blue]="filterHasElevator" [class.border-brand-blue]="filterHasElevator" [class.border-gray-200]="!filterHasElevator" [class.shadow-md]="filterHasElevator" [class.shadow-brand-blue/20]="filterHasElevator">
-                  <svg *ngIf="filterHasElevator" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <span class="text-sm font-bold text-gray-600 group-hover:text-brand-blue transition-colors select-none">Ascensor</span>
-              </label>
-
-              <!-- Aire Acondicionado -->
-              <label class="flex items-center gap-3 cursor-pointer group">
-                <input type="checkbox" [(ngModel)]="filterHasAC" (ngModelChange)="applyFilters()" class="hidden">
-                <div class="w-5 h-5 rounded-md border bg-white flex items-center justify-center transition-all duration-200 group-hover:border-brand-blue/50 group-hover:shadow-md"
-                  [class.bg-brand-blue]="filterHasAC" [class.border-brand-blue]="filterHasAC" [class.border-gray-200]="!filterHasAC" [class.shadow-md]="filterHasAC" [class.shadow-brand-blue/20]="filterHasAC">
-                  <svg *ngIf="filterHasAC" class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <span class="text-sm font-bold text-gray-600 group-hover:text-brand-blue transition-colors select-none">Aire Acondicionado</span>
-              </label>
-            </div>
-          </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -293,7 +278,7 @@
 
   <!-- Content State -->
   <div *ngIf="!isLoading" class="animate-in fade-in duration-500">
-    
+
 
 
     <app-featured-properties [properties]="propertiesList"></app-featured-properties>
