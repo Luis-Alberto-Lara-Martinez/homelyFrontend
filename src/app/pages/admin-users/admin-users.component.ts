@@ -364,7 +364,7 @@ export class AdminUsersComponent implements OnInit {
       this.newUser.status,
       this.newUser.password,
       this.newUser.confirmedPassword
-    ).subscribe({
+    ).pipe(timeout(15000)).subscribe({
       next: () => {
         this.isSavingUser = false;
         this.closeCreateModal();

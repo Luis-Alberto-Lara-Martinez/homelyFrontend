@@ -61,7 +61,7 @@ export class Properties {
   createProperty(propertyData: any): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.post<any>(`${this.baseUrl}`, propertyData, { headers });
+    return this.http.post<any>(`${environment.backendUrl}/admin/property`, propertyData, { headers });
   }
 
   // Actualizar una propiedad (asume PUT /api/properties/{id})
