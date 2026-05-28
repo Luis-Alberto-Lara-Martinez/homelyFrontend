@@ -468,10 +468,10 @@ export class VentasComponent implements OnInit, OnDestroy {
       residence: residenceDto,
       energyCertificate: this.isResidence() ? {
         hasCertificate: false,
-        consumptionScale: 'G',
-        consumptionValue: 0,
-        emissionsScale: 'G',
-        emissionsValue: 0
+        consumptionScale: null,
+        consumptionValue: null,
+        emissionsScale: null,
+        emissionsValue: null
       } : null
     };
 
