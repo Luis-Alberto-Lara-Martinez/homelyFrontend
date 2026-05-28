@@ -435,8 +435,8 @@ export class VentasComponent implements OnInit, OnDestroy {
     const residenceDto = this.isResidence() ? {
       bedrooms: this.formData.habitaciones,
       bathrooms: this.formData.banos,
-      conservation: 'Bueno',
-      orientation: 'Norte'
+      conservation: 'Excelente',
+      orientation: 'N'
     } : null;
 
     const extrasList = this.extras
