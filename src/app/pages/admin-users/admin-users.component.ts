@@ -163,7 +163,7 @@ export class AdminUsersComponent implements OnInit {
     this.isDeleting = true;
     this.cdr.detectChanges();
 
-    this.usersService.deleteUser(this.userToDelete.id).subscribe({
+    this.usersService.deleteUser(this.userToDelete.email).subscribe({
       next: () => {
         this.isDeleting = false;
         this.loadUsers(this.currentPage);

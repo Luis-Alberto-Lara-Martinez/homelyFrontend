@@ -126,12 +126,12 @@ export class Users {
   }
 
   // Delete user (para admin, DELETE /admin/user/{id} - si está habilitado)
-  deleteUser(id: number): Observable<any> {
+  deleteUser(email: string): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     return this.http.delete<any>(`${environment.backendUrl}/admin/user`, {
       headers: headers,
-      body: { id: id }
+      body: { email: email }
     });
   }
 
